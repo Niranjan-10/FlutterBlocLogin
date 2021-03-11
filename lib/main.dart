@@ -1,16 +1,25 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_login/bloc/login/login_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_login/services/locator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_login/view/login/login_screen.dart';
+import 'package:firebase_login/view/home/home_screen.dart';
 
-import 'bloc/auth_bloc.dart';
+import 'bloc/auth/auth_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   setUpLocator();
-  runApp(MyApp());
+  runApp(MultiBlocProvider(providers: [
+    BlocProvider<AuthBloc>(
+        create: (BuildContext context) =>
+            AuthBloc()..add(AuthStarted())),
+    BlocProvider<LoginBloc>(
+        create: (BuildContext context) =>
+            LoginBloc()..add(LoginStart())),
+  ], child: MyApp()));
 }
 
 class MyApp extends StatefulWidget {
@@ -23,6 +32,9 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        appBar: AppBar(
+          title: Text("Sign Up"),
+        ),
         body: Padding(
           padding: const EdgeInsets.all(12),
           child: BlocProvider(
@@ -59,6 +71,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     child: Text(state.message),
                   ),
                 ));
+                Navigator.push(context, MaterialPageRoute(builder: (context)=> HomeScreen(uuid:state.user.uid.toString(),)));
               } else if (state is AuthFail) {
                 Scaffold.of(context).showSnackBar(SnackBar(
                   content: Padding(
@@ -69,6 +82,7 @@ class _SignUpFormState extends State<SignUpForm> {
               }
             },
             builder: (context, state) => Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 TextFormField(
                   onChanged: (value) {
@@ -88,8 +102,20 @@ class _SignUpFormState extends State<SignUpForm> {
                     context
                         .bloc<AuthBloc>()
                         .add(AuthSignUp(email: email, password: password));
+                        
                   },
-                )
+                ),
+                SizedBox(height: 20.0,),
+                Row(children: [
+                  Text("Already have an account ?"),
+                  SizedBox(width: 10.0,),
+                  GestureDetector(
+                    child: Text("Login",style: TextStyle(color: Colors.blue),),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>LogInScreen()));
+                    },
+                  )
+                ],)
               ],
             ),
           ),

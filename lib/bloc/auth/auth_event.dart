@@ -5,6 +5,11 @@ abstract class AuthEvent extends Equatable {
 }
 
 
+class AuthStarted extends AuthEvent{
+  @override
+  List<Object> get props => [];
+}
+
 class AuthSignUp extends AuthEvent{
   final String email;
   final String password;

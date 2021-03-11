@@ -32,9 +32,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Stream<AuthState> _mapSignUpSubmitToState(String email,String password) async*{
-    print("Working here 1.5");
-    print(email);
-    print(password);
+    // print("Working here 1.5");
+    // print(email);
+    // print(password);
     try{
       // yield AuthSubmit();
       print("Working here 1.5");
@@ -44,7 +44,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       print(result.user.email);
       yield AuthSuccess('Signed in successfully',result.user);
     }on PlatformException catch (e, s) {
-      print("Working here 1.5 in failed");
       yield AuthFail(e.code);
     } catch (e, s) {
       print(e.toString());

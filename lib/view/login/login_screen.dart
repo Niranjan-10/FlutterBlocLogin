@@ -1,3 +1,4 @@
+import 'package:firebase_login/bloc/home/home_bloc.dart';
 import 'package:firebase_login/bloc/login/login_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,7 +20,7 @@ class _LogInScreenState extends State<LogInScreen> {
           padding: const EdgeInsets.all(12),
           child: BlocProvider(
             create: (context) {
-              return LoginBloc();
+              return LoginBloc(context.bloc<HomeBloc>());
             },
             child: LogInForm(),
           ),

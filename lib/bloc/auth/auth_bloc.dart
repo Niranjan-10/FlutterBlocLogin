@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_login/bloc/home/home_bloc.dart';
 import 'package:firebase_login/services/firebase_auth_service.dart';
 import 'package:firebase_login/services/locator.dart';
 import 'package:flutter/services.dart';
@@ -11,8 +12,10 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc() : super(AuthInitial());
+  AuthBloc(this._homeBloc) : super(AuthInitial());
   FirebaseAuthService _firebaseAuthService = locator<FirebaseAuthService>();
+
+  HomeBloc _homeBloc;
 
   @override
   Stream<AuthState> mapEventToState(
@@ -40,8 +43,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       print("Working here 1.5");
       
       UserCredential result = await _firebaseAuthService.signUp(email, password);
-
-      print(result.user.email);
+      User user = result.user;
+      _homeBloc.mapEventToGetData(user);
+      
       yield AuthSuccess('Signed in successfully',result.user);
     }on PlatformException catch (e, s) {
       yield AuthFail(e.code);

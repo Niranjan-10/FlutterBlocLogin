@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_login/bloc/home/home_bloc.dart';
 import 'package:firebase_login/bloc/login/login_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_login/services/locator.dart';
@@ -13,12 +14,13 @@ void main() async {
   await Firebase.initializeApp();
   setUpLocator();
   runApp(MultiBlocProvider(providers: [
+     BlocProvider<HomeBloc>(
+        create: (BuildContext context) => HomeBloc()..add(HomeStarted())),
     BlocProvider<AuthBloc>(
-        create: (BuildContext context) =>
-            AuthBloc()..add(AuthStarted())),
+        create: (BuildContext context) => AuthBloc(context.bloc<HomeBloc>())..add(AuthStarted())),
     BlocProvider<LoginBloc>(
-        create: (BuildContext context) =>
-            LoginBloc()..add(LoginStart())),
+        create: (BuildContext context) => LoginBloc(context.bloc<HomeBloc>())..add(LoginStart())),
+   
   ], child: MyApp()));
 }
 
@@ -39,7 +41,7 @@ class _MyAppState extends State<MyApp> {
           padding: const EdgeInsets.all(12),
           child: BlocProvider(
             create: (context) {
-              return AuthBloc();
+              return AuthBloc(context.bloc<HomeBloc>());
             },
             child: SignUpForm(),
           ),
@@ -71,7 +73,12 @@ class _SignUpFormState extends State<SignUpForm> {
                     child: Text(state.message),
                   ),
                 ));
-                Navigator.push(context, MaterialPageRoute(builder: (context)=> HomeScreen(uuid:state.user.uid.toString(),)));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HomeScreen(
+                              uuid: state.user.uid.toString(),
+                            )));
               } else if (state is AuthFail) {
                 Scaffold.of(context).showSnackBar(SnackBar(
                   content: Padding(
@@ -102,20 +109,31 @@ class _SignUpFormState extends State<SignUpForm> {
                     context
                         .bloc<AuthBloc>()
                         .add(AuthSignUp(email: email, password: password));
-                        
                   },
                 ),
-                SizedBox(height: 20.0,),
-                Row(children: [
-                  Text("Already have an account ?"),
-                  SizedBox(width: 10.0,),
-                  GestureDetector(
-                    child: Text("Login",style: TextStyle(color: Colors.blue),),
-                    onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>LogInScreen()));
-                    },
-                  )
-                ],)
+                SizedBox(
+                  height: 20.0,
+                ),
+                Row(
+                  children: [
+                    Text("Already have an account ?"),
+                    SizedBox(
+                      width: 10.0,
+                    ),
+                    GestureDetector(
+                      child: Text(
+                        "Login",
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LogInScreen()));
+                      },
+                    )
+                  ],
+                )
               ],
             ),
           ),
